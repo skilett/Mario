@@ -100,18 +100,16 @@ namespace Mario2
             if (player.X > disp.controlForm.Width - disp.sizeSpline - disp.offSetX)
             {                
                 disp.offSetX -= disp.controlForm.Width - disp.sizeSpline;
-                disp.Invalidate();
             }
             else if ((player.X + disp.offSetX < 0)&&(player.X > 0))
             {
                 disp.offSetX += disp.controlForm.Width - disp.sizeSpline;
-                disp.Invalidate();
             }
         }
         public void Update()
         {
             //disp.Update();
-            Invalidate();//сначала зачищаем все объекты
+            //disp.Invalidate();//сначала зачищаем все объекты
             //отрисовываем все остальные объекты
             player.Update();
             for (int i = 0; i < listMonsters.Count; i++)
@@ -120,7 +118,8 @@ namespace Mario2
             }
             level.Update();
             life.Update();
-            Invalidate();//сначала зачищаем все объекты
+           // disp.Update();
+            disp.Invalidate();//сначала зачищаем все объекты
         }
         public bool Collision(Unit units, double x, double y) //ограничиваем перемещение по X
         {
