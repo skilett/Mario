@@ -26,7 +26,7 @@ namespace Mario2
             
             DoubleBuffered = true; //двойная буферизация
             SetStyle(ControlStyles.UserPaint, true);
-            Time.Interval = 5; //50
+            Time.Interval = 50; //50
             Time.Tick += new EventHandler(Tick); //обсчет движений на карте
             Time.Start();
             TimeButton.Interval = 100; //как часто обрабатываются нажатия клавиш

@@ -94,7 +94,10 @@ namespace Mario2
             for (int i = 0; i < listMonsters.Count; i++)
             {
                 if (listMonsters[i].live == 0)
+                {
+                    listMonsters[i].Invalidate();
                     listMonsters.RemoveAt(i);
+                }
             }
             //передвигаем карту если игрок убежал
             if (player.X > disp.controlForm.Width - disp.sizeSpline - disp.offSetX)
@@ -109,7 +112,8 @@ namespace Mario2
         public void Update()
         {
             //disp.Update();
-            //disp.Invalidate();//сначала зачищаем все объекты
+            this.Invalidate();//сначала зачищаем все объекты
+            disp.Update();
             //отрисовываем все остальные объекты
             player.Update();
             for (int i = 0; i < listMonsters.Count; i++)
@@ -118,7 +122,7 @@ namespace Mario2
             }
             level.Update();
             life.Update();
-            disp.Update();
+            //disp.Update();
            // disp.Invalidate();//сначала зачищаем все объекты
         }
         public bool Collision(Unit units, double x, double y) //ограничиваем перемещение по X
@@ -359,7 +363,7 @@ namespace Mario2
         {            
             if (live > 0)//((live > 0)&&(changeView))
             {
-                Invalidate();
+                //Invalidate();
                 disp.Draw(anim.Texture, Convert.ToInt32(X), Convert.ToInt32(Y), Width, Height, skinRect());
                 lastX = X;
                 lastY = Y;
@@ -369,7 +373,7 @@ namespace Mario2
         public void Invalidate()
         {
             //if (changeView)
-                disp.Invalidate((int) lastX, (int)lastY, Width, Height);
+                disp.Invalidate(Convert.ToInt32(lastX), Convert.ToInt32(lastY), Width, Height );
         }
     }
     //*************************************************************monster**************************************************************
