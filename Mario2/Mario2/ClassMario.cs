@@ -118,8 +118,8 @@ namespace Mario2
             }
             level.Update();
             life.Update();
-           // disp.Update();
-            disp.Invalidate();//сначала зачищаем все объекты
+            disp.Update();
+           // disp.Invalidate();//сначала зачищаем все объекты
         }
         public bool Collision(Unit units, double x, double y) //ограничиваем перемещение по X
         {
@@ -349,21 +349,20 @@ namespace Mario2
             if ((x != 0) || (y != 0))
             //передвигаем объект
             {
-                //   Invalidate();
+                //Invalidate();//disp.Invalidate(X, Y, Width, Height);//   Invalidate();
                 changeView = true;
                 X = X + x;
                 Y = Y + y;
             }   
         }
         public override void Update()
-        {
-            //Invalidate();
+        {            
             if (live > 0)//((live > 0)&&(changeView))
             {
+                Invalidate();
                 disp.Draw(anim.Texture, Convert.ToInt32(X), Convert.ToInt32(Y), Width, Height, skinRect());
                 lastX = X;
                 lastY = Y;
-                //Invalidate();
                 changeView = false;
             }
         }
