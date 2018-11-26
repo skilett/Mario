@@ -26,10 +26,10 @@ namespace Mario2
             
             DoubleBuffered = true; //двойная буферизация
             SetStyle(ControlStyles.UserPaint, true);
-            Time.Interval = 5; //50
+            Time.Interval = 40; //50
             Time.Tick += new EventHandler(Tick); //обсчет движений на карте
             Time.Start();
-            TimeButton.Interval = 100; //как часто обрабатываются нажатия клавиш
+            TimeButton.Interval = 200;
             TimeButton.Tick += new EventHandler(TickButton); //при нажатой кнопке вызывает цикличный вызов кнопки
 
             game1 = new Game(this);
@@ -77,19 +77,20 @@ namespace Mario2
                     //game1.level.Move(1, 0);
                     break;
                 case 39: //right
-                    game1.player.Move(1, 0);                    
+                    game1.player.Move(1, 0);
+                    //game1.level.Move(1, 0);
                     break;
                 case 116://F5
                     game1 = new Game(this);
                     break;
             }
         }
-        public void Tick(object Sender, EventArgs e) 
+        public void Tick(object Sender, EventArgs e)
         {
-            game1.Tick(); //такт обсчета физики
+            game1.Tick();
             i++;
             label1.Text = i.ToString();
-            //Update();
+            Update();
             lScore.Text = game1.player.Score.ToString(); //отобразить изменения счета на экране
             game1.Update();
         }
