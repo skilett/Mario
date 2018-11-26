@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mario2", "Mario2\Mario2.csproj", "{5FF4539E-2113-4679-B8A8-02E2394910CD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5FF4539E-2113-4679-B8A8-02E2394910CD}.Debug|x86.ActiveCfg = Debug|x86
+		{5FF4539E-2113-4679-B8A8-02E2394910CD}.Debug|x86.Build.0 = Debug|x86
+		{5FF4539E-2113-4679-B8A8-02E2394910CD}.Release|x86.ActiveCfg = Release|x86
+		{5FF4539E-2113-4679-B8A8-02E2394910CD}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
