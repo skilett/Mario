@@ -6,3 +6,11 @@ c:\users\belov.vasily\documents\visual studio 2010\Projects\Mario2\Mario2\bin\De
 c:\users\belov.vasily\documents\visual studio 2010\Projects\Mario2\Mario2\obj\x86\Debug\Mario2.exe
 c:\users\belov.vasily\documents\visual studio 2010\Projects\Mario2\Mario2\obj\x86\Debug\Mario2.pdb
 C:\Users\belov.vasily\documents\visual studio 2010\Projects\Mario2\Mario2\obj\x86\Debug\Mario2.csprojResolveAssemblyReference.cache
+C:\GitHub\Mario\Mario2\obj\x86\Debug\Mario2.exe
+C:\GitHub\Mario\Mario2\obj\x86\Debug\Mario2.pdb
+C:\GitHub\Mario\Mario2\bin\Debug\Mario2.exe
+C:\GitHub\Mario\Mario2\bin\Debug\Mario2.pdb
+C:\GitHub\Mario\Mario2\obj\x86\Debug\Mario2.csprojResolveAssemblyReference.cache
+C:\GitHub\Mario\Mario2\obj\x86\Debug\Mario2.Form1.resources
+C:\GitHub\Mario\Mario2\obj\x86\Debug\Mario2.Properties.Resources.resources
+C:\GitHub\Mario\Mario2\obj\x86\Debug\Mario2.csproj.GenerateResource.Cache

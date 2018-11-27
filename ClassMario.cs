@@ -10,7 +10,7 @@ namespace Mario2
 {
     public class Game
     {
-        Control controlForm;
+        public Display disp;
         public Physics Phisic;
         public Map level;
         public Unit player;
@@ -19,27 +19,19 @@ namespace Mario2
         public Game(Control Controls)
         {
             Phisic = new Physics(this);
-            controlForm = Controls;
-            level = new Map(controlForm, new Point(10, 10), new Point(1000, 500));
+            disp = new Display(Controls);
+            level = new Map(disp, new Point(10, 10), new Point(1000, 500));
             player = newPlayer(380, 120);
             newLife();
             life.Value(player.live);
             newMonster(580, 200);
             newMonster(700, 200);
             newMonster(180, 200);
-            newMonster(220, 250);
-            newMonster(110, 250);
-            newMonster(110, 300);
-            newMonster(110, 350);
-            newMonster(410, 250);
-            newMonster(510, 250);
             Update();
         }
         private Unit newPlayer(int x, int y)
         {
-            string path = Environment.CurrentDirectory;
-            string pathTexture = path + "\\spriteMario.png";
-            player = new Unit(controlForm, new Animate(pathTexture), Phisic, new Point(x, y));
+            player = new Unit(disp, new Animate("spriteMario.png"), Phisic, new Point(x, y));
             player.anim.Add("stay");
             player.anim.state("stay").Add(new Rectangle(7, 176, 37, 37));
 
@@ -61,9 +53,7 @@ namespace Mario2
         }
         private void newMonster(int x, int y)
         {
-            string path = Environment.CurrentDirectory;
-            string pathTexture = path + "\\spriteMario.png";
-            listMonsters.Add(new Monster(controlForm, new Animate(pathTexture), Phisic, new Point(x, y)));
+            listMonsters.Add(new Monster(disp, new Animate("spriteMario.png"), Phisic, new Point(x, y)));
 
             int index = listMonsters.Count - 1;
             listMonsters[index].anim.Add("stay");
@@ -81,12 +71,12 @@ namespace Mario2
 
             listMonsters[index].autoMove = true;
             listMonsters[index].maxVx = 2;
-            listMonsters[index].vx = -2;
+            listMonsters[index].vx = -4;
             listMonsters[index].live = 1;
         }
         private void newLife()
         { 
-            life = new Interface(controlForm, new Point(50, 0), new Point(32, 32));
+            life = new Interface(disp, new Point(50, 0), new Point(32, 32));
             life.Add(new Rectangle(192, 0, 64, 64));
             life.Add(new Rectangle(192, 0, 64, 64));
             life.Add(new Rectangle(128, 0, 64, 64));
@@ -105,14 +95,25 @@ namespace Mario2
             for (int i = 0; i < listMonsters.Count; i++)
             {
                 if (listMonsters[i].live == 0)
+                {
+                    listMonsters[i].Invalidate();
                     listMonsters.RemoveAt(i);
-
+                }
             }
-            
+            //передвигаем карту если игрок убежал
+            if (player.X > disp.controlForm.Width - disp.sizeSpline - disp.offSetX)
+            {                
+                disp.offSetX -= disp.controlForm.Width - disp.sizeSpline;
+            }
+            else if ((player.X + disp.offSetX < 0)&&(player.X > 0))
+            {
+                disp.offSetX += disp.controlForm.Width - disp.sizeSpline;
+            }
         }
         public void Update()
         {
-            controlForm.Update();
+            this.Invalidate();//сначала зачищаем все объекты
+            disp.Update();    //отрисовываем все остальные объекты
             player.Update();
             for (int i = 0; i < listMonsters.Count; i++)
             {
@@ -121,7 +122,7 @@ namespace Mario2
             level.Update();
             life.Update();
         }
-        public bool Collision(Unit units, int x, int y) //ограничиваем перемещение по X
+        public bool Collision(Unit units, double x, double y) //ограничиваем перемещение по X
         {
             if (x > 0) units.state = "right";
             else if (x < 0) units.state = "left";
@@ -130,7 +131,7 @@ namespace Mario2
             bool change = false;
             if (x > 0)
             {
-                int xWall = level.distWall(units, 'R');
+                double xWall = level.distWall(units, 'R');
                 if (xWall < units.X + x)
                 {
                     x = xWall - units.X;
@@ -140,7 +141,7 @@ namespace Mario2
             }
             else if (x < 0)
             {
-                int xWall = level.distWall(units, 'L');
+                double xWall = level.distWall(units, 'L');
                 if (xWall > units.X + x)
                 {
                     x = xWall - units.X;
@@ -153,7 +154,7 @@ namespace Mario2
 
             if (y > 0)
             {
-                int xWall = level.distWall(units, 'D');
+                double xWall = level.distWall(units, 'D');
                 if (xWall < units.Y + y)
                 {
                     y = xWall - units.Y;
@@ -165,7 +166,7 @@ namespace Mario2
             }
             else if (y < 0)
             {
-                int xWall = level.distWall(units, 'U');
+                double xWall = level.distWall(units, 'U');
                 if (xWall > units.Y + y)
                 {
                     y = xWall - units.Y;
@@ -177,14 +178,12 @@ namespace Mario2
             //перемещаем объект по x
             units.MovePoz(0, y);
             if ((x == 0) && (y == 0) && (units.state != "stay"))
-            {                
-                units.Invalidate();
+            { 
                 units.state = "stay";
             }
             CollisionMonster();     
             //проверяем задели ли интрактивные элементы
-            level.collision(units);
-                   
+            level.collision(units);                   
             return change;
         }
         void CollisionMonster()
@@ -205,7 +204,6 @@ namespace Mario2
                 {//мочим монстра                    
                     monsters.live--;
                     player.Score += 10;
-                    controlForm.Invalidate(new Rectangle(monsters.X, monsters.Y, monsters.Width, monsters.Height));
                 }
                 else
                 {//коцаем игрока если он не в защите
@@ -224,32 +222,39 @@ namespace Mario2
                 return false;
             }
         }
-        bool CollisionPoint(int x, int y, Monster monsters)
+        bool CollisionPoint(double x, double y, Monster monsters)
         {
             if ((x >= monsters.X) && (x < monsters.X + monsters.Width) && (y >= monsters.Y) && (y < monsters.Y + monsters.Height))
                 return true;
             return false;
+        }
+        public void Invalidate()
+        {
+            player.Invalidate();
+            for (int i = 0; i < listMonsters.Count; i++)
+            {
+                listMonsters[i].Invalidate();
+            }
         }
     }
 
     public abstract class BaseClass
     {
         //свойства
-        public Control controlForm;
-        protected GraphicsUnit sizeScrean = GraphicsUnit.Pixel;       
-        protected Graphics graphic; 
-        protected int sizeSpline = 48;
-        public int X = 0;
-        public int Y = 0;
+        protected Display disp;
+        public double X = 0;
+        public double Y = 0;
+        public double lastX = 0;
+        public double lastY = 0;
         public int Height = 1; //высота
         public int Width = 1; //ширина
         //методы
         public BaseClass() 
         {    
         }
-        public BaseClass(Control controls) : this()
+        public BaseClass(Display disp) : this()
         {
-            controlForm = controls;            
+            this.disp = disp;            
         }
         public abstract void Update();
         public virtual void Move(int x, int y)
@@ -264,28 +269,25 @@ namespace Mario2
         public int Score = 0;
         public int immortal = 0; //сколько тиков не уязвимости
         public int maxVx = 30, maxVy = 40;//максимальная скорость объекта
-        public int impulsX = 12, impulsY = 40;
+        public int impulsX = 24, impulsY = 70;
         public int jump = 0; //кол-во прыжков        
         string _state = "stay";     //состояние (стоит бежит падает)
         public int live = 4;
         public Animate anim;
         public Physics phisic;  //-------------------------------переместить в Game
         public bool ground = false; //стоит на земле
-        protected int _vx = 0;
-        public int vy = 0;
-        public Unit(Control controls, Animate animates, Physics phisic, Point poz) : base(controls)
+        protected double _vx = 0;
+        public double vy = 0;
+        public Unit(Display disp, Animate animates, Physics phisic, Point poz) : base(disp)
         {
-            //controlForm.Controls.Add(pic);
-            //graphic = pic.CreateGraphics();
-            graphic = controlForm.CreateGraphics();
-            Height = sizeSpline;
-            Width = sizeSpline;
+            Height = disp.sizeSpline;
+            Width = disp.sizeSpline;
             anim = animates;
             this.phisic = phisic;
             X = poz.X;
             Y = poz.Y;
         }    
-        public virtual int vx //скорость объекта 
+        public virtual double vx //скорость объекта 
         {
             set
             {
@@ -298,7 +300,7 @@ namespace Mario2
         }
         public Rectangle coordRect()
         {
-            return new Rectangle(X, Y, Width, Height);
+            return new Rectangle(Convert.ToInt32(X), Convert.ToInt32(Y), Width, Height);
         }
         public string state
         {
@@ -314,6 +316,7 @@ namespace Mario2
                 _state = value;
             }
         }
+        public bool changeView = true; //необходимость перерисовки объекта
         Rectangle skinRect()
         {
             Rectangle r = anim.state(state).Rect();
@@ -331,40 +334,38 @@ namespace Mario2
                 y = 0;
             phisic.Move(this, x * impulsX, y * impulsY);
         }
-        public void MovePoz(int x, int y) //cдвигает все координаты на указанную величину
+        public void MovePoz(double x, double y) //cдвигает все координаты на указанную величину
         {
             if (Y + y > 550)  //временное ограничение по падению
             {
                 y = 0;
                 jump = 0;
                 ground = true;
+                changeView = true;
             }
 
             if ((x != 0) || (y != 0))
             //передвигаем объект
             {
-                Invalidate();
+                changeView = true;
                 X = X + x;
                 Y = Y + y;
             }   
         }
         public override void Update()
-        {          
-            if (live > 0)
+        {            
+            if (live > 0)//((live > 0)&&(changeView))
             {
-                Point[] poz = new Point[] {
-                    new Point(X, Y),
-                    new Point(X + Width, Y),
-                    new Point(X, Y + Height)
-                };
-                graphic.DrawImage(anim.Texture, poz, skinRect(), sizeScrean);
+                disp.Draw(anim.Texture, Convert.ToInt32(X), Convert.ToInt32(Y), Width, Height, skinRect());
+                lastX = X;
+                lastY = Y;
+                changeView = false;
             }
-            //else controlForm.Invalidate(new Rectangle(X, Y, Width, Height));
         }
         public void Invalidate()
         {
-            controlForm.Invalidate(new Rectangle(X, Y, Width, Height));
-            //controlForm.Update();
+            //if (changeView)
+                disp.Invalidate(Convert.ToInt32(lastX), Convert.ToInt32(lastY), Width, Height );
         }
     }
     //*************************************************************monster**************************************************************
@@ -372,10 +373,10 @@ namespace Mario2
     {        
         public char Direction = 'R';
         public int Price = 10;
-        public Monster(Control controls, Animate animates, Physics phisic, Point poz) : base(controls, animates, phisic, poz)
+        public Monster(Display disp, Animate animates, Physics phisic, Point poz) : base(disp, animates, phisic, poz)
         {
         }
-        public override int vx
+        public override double vx
         {
             set 
             {
@@ -400,66 +401,54 @@ namespace Mario2
     {
         //свойства
         public string[] TileMap;
-        //int Height = 0, Width = 0;
         public Image Texture; //ссылка на файл с которого читаем картинку    
         public Image BackGround;
         //методы
-        public Map(Control controls, Point poz, Point size)
-            : base(controls)
+        public Map(Display disp, Point poz, Point size)
+            : base(disp)
         {
-            graphic = controls.CreateGraphics();
-            string[] TM2 = {
-                        "                                                                  B",
-                        "    M                                                             B",
-                        "B  MMM           B                                                B",
-                        "B  MMMM          B                                                B",
-                        "B MMMMMM    MMMM B                                                B",
-                        "B          MMMMMMB         MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM     B",
-                        "BBB     MMMMMBBBBB                                                B",
-                        "B    MMMMMMMMMM BB                                                B",
-                        "B                                       MMMMMMMMMMMMM             B",
-                        "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
-                        };
+            string[] TM2;
+            try
+            {
+                TM2 = File.ReadAllLines("level1.map");                
+            }
+            catch
+            {
+                //string path = Environment.CurrentDirectory;
+                TM2 = new string[] {
+                            "B                                                                 B",
+                            "B                                                                 B",
+                            "B                                                                 B",
+                            "B                                                                 B",
+                            "B                                                                 B",
+                            "B                                                                 B",
+                            "B                                                                 B",
+                            "B                                                                 B",
+                            "B                                                                 B",
+                            "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+                            };
+            }
             TileMap = TM2;
             Height = TileMap.Length; //высота
             Width = TileMap[0].Length; //ширина
-            string path = Environment.CurrentDirectory;
-            string pathTexture = path + "\\spriteMario.png";
-            Texture = new Bitmap(Image.FromFile(pathTexture));
-            string pathBackG = path + "\\Desert.jpg";
-            BackGround = new Bitmap(Image.FromFile(pathBackG));
-            controlForm.BackgroundImage = BackGround;  
-        }
-        public override void Move(int x, int y)
-        {
-            controlForm.Invalidate();
-            X += x;
-            Y += y;
+            //string path = Environment.CurrentDirectory;
+            Texture = new Bitmap(Image.FromFile("SpriteMario.png"));
+            BackGround = new Bitmap(Image.FromFile("Desert.jpg"));
+            disp.controlForm.BackgroundImage = BackGround;           
         }
         public override void Update()
-        {
-            Point[] RectWall = new Point[3];
+        {           
             for (int i = 0; i < Height; i++)
                 for (int j = 0; j < Width; j++)
                 {
                     switch (TileMap[i][j])
                     {
                         case 'B': 
-                            RectWall = new Point[] {
-                            new Point(X + sizeSpline * j, Y + sizeSpline * i),
-                            new Point(X + sizeSpline * j + sizeSpline, Y + sizeSpline * i),
-                            new Point(X + sizeSpline * j, Y + sizeSpline * i + sizeSpline)
-                            };
-                            graphic.DrawImage(Texture, RectWall, new Rectangle(643, 171, 28, 29), sizeScrean);  /// прописать отрисовку в битмапе а потом уже на форме
-                        break;
+                            disp.Draw(Texture, disp.sizeSpline * j, disp.sizeSpline * i, disp.sizeSpline, disp.sizeSpline, new Rectangle(643, 171, 28, 29));                            
+                            break;
                         case 'M':
-                            RectWall = new Point[] {
-                            new Point(X + sizeSpline * j, Y + sizeSpline * i),
-                            new Point(X + sizeSpline * j + sizeSpline, Y + sizeSpline * i),
-                            new Point(X + sizeSpline * j, Y + sizeSpline * i + sizeSpline)
-                            };
-                            graphic.DrawImage(Texture, RectWall, new Rectangle(358, 12, 21, 30), sizeScrean);  /// прописать отрисовку в битмапе а потом уже на форме
-                        break;
+                            disp.Draw(Texture, disp.sizeSpline * j, disp.sizeSpline * i, disp.sizeSpline, disp.sizeSpline, new Rectangle(358, 12, 21, 30));
+                            break;
                     }
                 }                
         }
@@ -497,7 +486,7 @@ namespace Mario2
                     break;
                 case 'R':
                     pozX = getPozX(units.X + units.Width - 1);
-                    result = Width;
+                    result = Width; //сохраняем предел карты
                     for (int i = pozX + 1; i < Width; i++)
                     {
                         if (TileMap[pozY][i] == 'B') 
@@ -547,8 +536,8 @@ namespace Mario2
                             break;
                         }
                     }
-                    pozX = (int)((units.X + units.Width - 1) / sizeSpline); //проверяем по 2й точке
-                    for (int j = pozY + 1; j < result; j++)
+                    pozX = (int)((units.X + units.Width - 1) / disp.sizeSpline); //проверяем по 2й точке
+                    for (int j = pozY + 1; j <= result; j++)
                     {
                         if (TileMap[j][pozX] == 'B')
                         {
@@ -558,7 +547,8 @@ namespace Mario2
                     }
                     break;
             }
-            return result * sizeSpline; 
+            if (result == 0) result = -10;
+            return result * disp.sizeSpline; 
         }
         public void collision(Unit units)
         {
@@ -568,25 +558,25 @@ namespace Mario2
             if (collisionPoint(units, units.X, units.Y, out pozXX, out pozYY) != ' ')
             {
                 units.Score++;
-                controlForm.Invalidate(new Rectangle(pozXX, pozYY, sizeSpline, sizeSpline));
+                disp.Invalidate(pozXX, pozYY, disp.sizeSpline, disp.sizeSpline);                
             }
             if (collisionPoint(units, units.X + units.Width, units.Y, out pozXX, out pozYY) != ' ')
             {
                 units.Score++;
-                controlForm.Invalidate(new Rectangle(pozXX, pozYY, sizeSpline, sizeSpline));
+                disp.Invalidate(pozXX, pozYY, disp.sizeSpline, disp.sizeSpline);
             }
             if (collisionPoint(units, units.X, units.Y + units.Height, out pozXX, out pozYY) != ' ')
             {
                 units.Score++;
-                controlForm.Invalidate(new Rectangle(pozXX, pozYY, sizeSpline, sizeSpline));
+                disp.Invalidate(pozXX, pozYY, disp.sizeSpline, disp.sizeSpline);
             }
             if (collisionPoint(units, units.X + units.Width, units.Y + units.Height, out pozXX, out pozYY) != ' ')
             {
                 units.Score++;
-                controlForm.Invalidate(new Rectangle(pozXX, pozYY, sizeSpline, sizeSpline));
+                disp.Invalidate(pozXX, pozYY, disp.sizeSpline, disp.sizeSpline);
             }
         } //результаты взаимодействия с объектами на карте
-        private char collisionPoint(Unit units, int x, int y, out int pozX, out int pozY)
+        private char collisionPoint(Unit units, double x, double y, out int pozX, out int pozY)
         {
             int indexX = getPozX(x);
             int indexY = getPozY(y);
@@ -597,8 +587,8 @@ namespace Mario2
                 TileMap[indexY] = ReplaceCharInString(TileMap[indexY], indexX, 'C');
 
             }
-            pozX = indexX * sizeSpline;
-            pozY = indexY * sizeSpline;
+            pozX = indexX * disp.sizeSpline;
+            pozY = indexY * disp.sizeSpline;
             return result;
         }//взаимодействие с картой
         private String ReplaceCharInString(String source, int index, Char newSymb)
@@ -607,16 +597,16 @@ namespace Mario2
             chars[index] = newSymb;
             return new String(chars);
         }
-        private int getPozX(int x)
+        private int getPozX(double x)
         {
-            int poz = (int)(x / sizeSpline);
+            int poz = (int)(x / disp.sizeSpline);
             if (poz < 0) return 0;
             if (poz > Width - 1) return Width - 1;
             return poz;
         }
-        private int getPozY(int y)
+        private int getPozY(double y)
         {
-            int poz = (int)(y / sizeSpline);
+            int poz = (int)(y / disp.sizeSpline);
             if (poz < 0) return 0;
             if (poz > Height - 1) return Height - 1;
             return poz;
@@ -629,17 +619,14 @@ namespace Mario2
         int Index = 0; //значение
         public Image Texture; //ссылка на файл с которого читаем картинку 
         List<Rectangle> Rect = new List<Rectangle>();
-        public Interface(Control controls, Point poz, Point size)
-            : base(controls)
+        public Interface(Display disp, Point poz, Point size)
+            : base(disp)
         {
             X = poz.X;
             Y = poz.Y;
             Width = size.X;
             Height = size.Y;
-            graphic = controls.CreateGraphics();
-            string path = Environment.CurrentDirectory;
-            string pathTexture = path + "\\interface.png";
-            Texture = new Bitmap(Image.FromFile(@pathTexture));
+            Texture = new Bitmap(Image.FromFile("interface.png"));
         }
         public void Add(Rectangle R)
         {
@@ -650,20 +637,13 @@ namespace Mario2
             if ((i < Rect.Count) && (i > -1))
             {
                 Index = i;
-                controlForm.Invalidate(new Rectangle(X, Y, Width, Height));
+                disp.Invalidate((int) X,  (int) Y, Width, Height);
             }
         }
         public override void Update()
         {            
             if (Rect.Count > 0)
-            {
-                Point[] poz = new Point[] {
-                    new Point(X, Y),
-                    new Point(X + Width, Y),
-                    new Point(X, Y + Height)
-                };
-                graphic.DrawImage(Texture, poz, Rect[Index], sizeScrean);
-            }            
+                disp.Draw(Texture, Convert.ToInt32(X), Convert.ToInt32(Y), Width, Height, Rect[Index]);
         }
         
     }
@@ -734,9 +714,9 @@ namespace Mario2
     //*****************************************************физика***************************************************************************
     public class Physics
     {
-        int ay = -5; //гравитация
-        int friction = 2; //трение
-        int time = 1; //коэф замедления времени
+        int ay = -10; //гравитация
+        int friction = 6; //трение
+        double time = 0.5; //коэф замедления времени --влияет на фпс
         private Game games;
         public Physics(Game games)
         {
@@ -752,7 +732,7 @@ namespace Mario2
         {
             //анализ скорости, замедление
             //y
-            int y = units.vy - ay;
+            double y = units.vy - ay;
 
             if (Math.Abs(y) > friction * time)
                 units.vy = Math.Sign(y) * (Math.Abs(y) - friction * time);
@@ -771,5 +751,51 @@ namespace Mario2
             games.Collision(units, units.vx * time, units.vy * time);
         }
     }
-
+    public class Display
+    {
+        public Control controlForm;
+        Graphics graphic;
+        public int sizeSpline = 48;
+        int _offSetX = 0;
+        int _offSetY = 0;
+        public int offSetX
+        {
+            get { return _offSetX; }
+            set 
+            {
+                _offSetX = value;
+                Invalidate();
+            }
+        }
+        public int offSetY = 0;
+        public Display(Control controls)
+        {
+            controlForm = controls;
+            graphic = controlForm.CreateGraphics();
+            offSetX = 0;
+            offSetY = 0;
+        }
+        public void Invalidate()
+        {
+            controlForm.Invalidate();
+        }
+        public void Invalidate(int x, int y, int width, int height)
+        {
+            controlForm.Invalidate(new Rectangle(x + offSetX, y + offSetY, width, height));
+        }
+        public void Draw(Image texture, int x, int y, int width, int height, Rectangle rect)
+        {
+            x += offSetX;
+            y += offSetY;
+            Point[] poz = new Point[] {
+                    new Point(x, y),
+                    new Point(x + width, y),
+                    new Point(x, y + height)};
+            graphic.DrawImage(texture, poz, rect, GraphicsUnit.Pixel);
+        }
+        public void Update()
+        {
+            controlForm.Update();
+        }
+    }
 }
