@@ -111,10 +111,8 @@ namespace Mario2
         }
         public void Update()
         {
-            //disp.Update();
             this.Invalidate();//сначала зачищаем все объекты
-            disp.Update();
-            //отрисовываем все остальные объекты
+            disp.Update();    //отрисовываем все остальные объекты
             player.Update();
             for (int i = 0; i < listMonsters.Count; i++)
             {
@@ -122,8 +120,6 @@ namespace Mario2
             }
             level.Update();
             life.Update();
-            //disp.Update();
-           // disp.Invalidate();//сначала зачищаем все объекты
         }
         public bool Collision(Unit units, double x, double y) //ограничиваем перемещение по X
         {
@@ -181,14 +177,12 @@ namespace Mario2
             //перемещаем объект по x
             units.MovePoz(0, y);
             if ((x == 0) && (y == 0) && (units.state != "stay"))
-            {                
-               // units.Invalidate();
+            { 
                 units.state = "stay";
             }
             CollisionMonster();     
             //проверяем задели ли интрактивные элементы
-            level.collision(units);
-                   
+            level.collision(units);                   
             return change;
         }
         void CollisionMonster()
@@ -209,7 +203,6 @@ namespace Mario2
                 {//мочим монстра                    
                     monsters.live--;
                     player.Score += 10;
-                   // disp.Invalidate(Convert.ToInt32(monsters.X), Convert.ToInt32(monsters.Y), monsters.Width, monsters.Height);
                 }
                 else
                 {//коцаем игрока если он не в защите
@@ -353,7 +346,6 @@ namespace Mario2
             if ((x != 0) || (y != 0))
             //передвигаем объект
             {
-                //Invalidate();//disp.Invalidate(X, Y, Width, Height);//   Invalidate();
                 changeView = true;
                 X = X + x;
                 Y = Y + y;
@@ -363,7 +355,6 @@ namespace Mario2
         {            
             if (live > 0)//((live > 0)&&(changeView))
             {
-                //Invalidate();
                 disp.Draw(anim.Texture, Convert.ToInt32(X), Convert.ToInt32(Y), Width, Height, skinRect());
                 lastX = X;
                 lastY = Y;
@@ -625,7 +616,6 @@ namespace Mario2
             Y = poz.Y;
             Width = size.X;
             Height = size.Y;
-            //graphic = controls.CreateGraphics();
             Texture = new Bitmap(Image.FromFile("interface.png"));
         }
         public void Add(Rectangle R)
@@ -638,7 +628,6 @@ namespace Mario2
             {
                 Index = i;
                 disp.Invalidate((int) X,  (int) Y, Width, Height);
-                //controlForm.Invalidate(new Rectangle(X, Y, Width, Height));
             }
         }
         public override void Update()
