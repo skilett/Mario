@@ -11,7 +11,8 @@ namespace Mario2
 {
     public partial class Form1 : Form
     {
-        Game game1; 
+        public Game game1;
+        public UI MainMenu;
         bool lagButton = false;   //храним нажата ли кнопка   
         int button = 0;
         int i = 0;
@@ -33,15 +34,15 @@ namespace Mario2
             TimeButton.Tick += new EventHandler(TickButton); //при нажатой кнопке вызывает цикличный вызов кнопки
 
             game1 = new Game(this);
+            game1.player.live = 0;
+            MainMenu = new UI(this);
+            this.KeyPreview = true;
         }
 
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
         }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-        }
+        
 
         private void Form1_KeyUp(object sender, KeyEventArgs e)
         {
@@ -79,12 +80,16 @@ namespace Mario2
                     game1.player.Move(1, 0);                    
                     break;
                 case 116://F5
-                    game1 = new Game(this);
+                    //game1 = new Game(this);
                     break;
             }
         }
         public void Tick(object Sender, EventArgs e) 
         {
+            if ((MainMenu == null) && (game1.player.live < 1))  //возвращаем меню если погибли
+            {
+                MainMenu = new UI(this);
+            }
             game1.Tick(); //такт обсчета физики
             i++;
             label1.Text = i.ToString();
@@ -95,6 +100,38 @@ namespace Mario2
         private void lScore_Paint(object sender, PaintEventArgs e)
         {
                 
+        }
+
+        private void labelScore_Click(object sender, EventArgs e)
+        {
+
+        }
+        public void DisposeUI()
+        {
+            MainMenu = null;           
+        }
+    }
+    public class UI
+    {
+        Control MainForm;
+        Button Btn;
+        public UI(Control Controls)
+        {
+            MainForm = Controls;
+            Btn = new UIButton();
+            Btn.Text = "НАЧАТЬ ИГРУ";
+            Btn.Font = new Font(Btn.Font.Name, 30);
+            Btn.Size = new Size(Controls.Controls.Owner.Width / 2, Controls.Controls.Owner.Height / 2);
+            Btn.Location = new Point(Convert.ToInt32(Controls.Controls.Owner.Width / 2 - Btn.Size.Width / 2), Convert.ToInt32(Controls.Controls.Owner.Height / 2 - Btn.Size.Height / 2));
+            MainForm.Controls.Add(Btn);
+            Btn.Click += new System.EventHandler(UI_Click);
+        }
+        private void UI_Click(object sender, EventArgs e)
+        {
+            Form1 f1 = MainForm as Form1;
+            f1.game1 = new Game(f1);
+            Btn.Dispose();
+            f1.DisposeUI();
         }
     }
 }

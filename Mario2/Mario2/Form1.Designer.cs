@@ -51,6 +51,7 @@
             this.labelScore.Size = new System.Drawing.Size(91, 38);
             this.labelScore.TabIndex = 1;
             this.labelScore.Text = "Счет: ";
+            this.labelScore.Click += new System.EventHandler(this.labelScore_Click);
             // 
             // lScore
             // 
@@ -60,7 +61,6 @@
             this.lScore.Name = "lScore";
             this.lScore.Size = new System.Drawing.Size(0, 38);
             this.lScore.TabIndex = 2;
-            //this.lScore.Paint += new System.Windows.Forms.PaintEventHandler(this.lScore_Paint);
             // 
             // Form1
             // 
@@ -70,9 +70,11 @@
             this.Controls.Add(this.lScore);
             this.Controls.Add(this.labelScore);
             this.Controls.Add(this.label1);
+            this.DoubleBuffered = true;
+            this.KeyPreview = true;
             this.Name = "Form1";
             this.Text = "Form1";
-            this.Paint += new System.Windows.Forms.PaintEventHandler(Form1_Paint);
+            this.Paint += new System.Windows.Forms.PaintEventHandler(this.Form1_Paint);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyUp);
             this.ResumeLayout(false);
@@ -85,7 +87,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label labelScore;
         private System.Windows.Forms.Label lScore;
-
     }
 }
 

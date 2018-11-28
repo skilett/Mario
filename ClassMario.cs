@@ -5,6 +5,8 @@ using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
+//using MyClass;
+
 
 namespace Mario2
 {
@@ -16,6 +18,7 @@ namespace Mario2
         public Unit player;
         List<Monster> listMonsters = new List<Monster>();
         public Interface life;
+        //public UI MainMenu;
         public Game(Control Controls)
         {
             Phisic = new Physics(this);
@@ -26,8 +29,8 @@ namespace Mario2
             life.Value(player.live);
             newMonster(580, 200);
             newMonster(700, 200);
-            newMonster(180, 200);
             Update();
+            //MainMenu = new Mario2.UI(Controls);
         }
         private Unit newPlayer(int x, int y)
         {
@@ -647,6 +650,8 @@ namespace Mario2
         }
         
     }
+    
+    
     //********************************************************Анимация******************************************************************
     public class Animate
     {
